@@ -1,0 +1,39 @@
+# Run from the project root:
+#   docker compose -f docker/docker-compose.yml run --rm mlops train
+name: mlops
+
+x-mlops: &mlops
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile
+  image: mlops-cli:latest
+  volumes:
+    - ../config.yaml:/app/config.yaml:ro
+    - ../data:/app/data
+    - ../models:/app/models
+    - ../reports:/app/reports
+    - ../logs:/app/logs
+
+services:
+  mlops:            # generic: pass any CLI command
+    <<: *mlops
+
+  ingest:
+    <<: *mlops
+    command: ["ingest", "--demo"]
+
+  preprocess:
+    <<: *mlops
+    command: ["preprocess"]
+
+  train:
+    <<: *mlops
+    command: ["train"]
+
+  evaluate:
+    <<: *mlops
+    command: ["evaluate"]
+
+  run-all:
+    <<: *mlops
+    command: ["run-all", "--demo"]
